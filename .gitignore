@@ -1,0 +1,32 @@
+# 1. 忽略 CMake 构建目录（截图中最主要的部分）
+build/
+cmake-build-debug/
+cmake-build-release/
+
+# 2. 忽略 CMake 生成的临时缓存和日志文件
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+compile_commands.json
+CTestTestfile.cmake
+
+# 3. 忽略编译生成的二进制文件和库文件
+*.o
+*.so
+*.a
+*.dylib
+*.dll
+*.exe
+a.out
+
+# 4. 忽略常见的 IDE 配置文件（保持仓库干净）
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 5. 忽略操作系统产生的垃圾文件
+.DS_Store
+Thumbs.db
