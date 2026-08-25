@@ -123,10 +123,10 @@ void EPollPoller::update(int operation , Channel *channel)
 {
     epoll_event event;
     bzero(&event, sizeof event);
-    int fd=channel->fd();
-    event.events=channel->events();
-    event.data.ptr=channel;
-    int fd=channel->fd();
+    int fd = channel->fd();
+    
+    event.events = channel->events();
+    event.data.ptr = channel;
 
     if(::epoll_ctl(epollfd_,operation ,fd,&event)<0)
     {
