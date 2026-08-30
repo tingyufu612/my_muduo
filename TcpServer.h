@@ -54,7 +54,7 @@ private:
 
     EventLoop *loop_;//baseloop 运行acceptor 轮询分发连接 用户定义
 
-    const std::string inPort_;//IP端口号
+    const std::string ipPort_;//IP端口号
     const std::string name_;
 
     std::unique_ptr<Acceptor> acceptor_;//监听新连接事件

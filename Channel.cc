@@ -16,7 +16,7 @@ Channel::Channel(EventLoop *loop,int fd)
 Channel::~Channel()
 {
 }
-
+//TCPCONNECTION=>channel 用于新connection
 void Channel::tie(const std::shared_ptr<void> &obj)
 {
     tie_=obj;
