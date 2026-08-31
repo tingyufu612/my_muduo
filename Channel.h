@@ -23,7 +23,7 @@ public:
     ~Channel();
 
     // fd得到poller通知以后，处理事件的
-     void handleEvent(Timestamp receiveTime);  
+    void handleEvent(Timestamp receiveTime);  
 
     // 设置回调函数对象
     void setReadCallback(ReadEventCallback cb) { readCallback_ = std::move(cb); }

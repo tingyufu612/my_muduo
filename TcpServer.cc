@@ -1,7 +1,6 @@
 #include "TcpServer.h"
 #include "Logger.h"
 #include "TcpConnection.h"
-#include "EventLoopThreadPool.h"
 
 #include <strings.h>
 #include <functional>
@@ -14,8 +13,6 @@ static EventLoop* CheckLoopNotNull(EventLoop *loop)
     }
     return loop;
 }
-
-
 
 TcpServer::TcpServer(EventLoop *loop,
                 const InetAddress &listenAddr,
@@ -51,39 +48,40 @@ TcpServer::~TcpServer()
     }
 }
 
-void TcpServer::setThreadNum(int numThreads)//设置底层sub库
+// 设置底层subloop的个数
+void TcpServer::setThreadNum(int numThreads)
 {
     threadPool_->setThreadNum(numThreads);
 }
 
-//loop.loop()
+// 开启服务器监听   loop.loop()
 void TcpServer::start()
 {
-   if (started_++ == 0) // 防止一个TcpServer对象被start多次
+    if (started_++ == 0) // 防止一个TcpServer对象被start多次
     {
         threadPool_->start(threadInitCallback_); // 启动底层的loop线程池
         loop_->runInLoop(std::bind(&Acceptor::listen, acceptor_.get()));
     }
 }
 
-//新客户端连接，acceptor会进行回调
+// 有一个新的客户端的连接，acceptor会执行这个回调操作
 void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr)
 {
-    EventLoop *ioLoop =threadPool_->getNextLoop();
-    char buf[64]={0};
+    // 轮询算法，选择一个subLoop，来管理channel
+    EventLoop *ioLoop = threadPool_->getNextLoop(); 
+    char buf[64] = {0};
     snprintf(buf, sizeof buf, "-%s#%d", ipPort_.c_str(), nextConnId_);
-
     ++nextConnId_;
     std::string connName = name_ + buf;
 
     LOG_INFO("TcpServer::newConnection [%s] - new connection [%s] from %s \n",
         name_.c_str(), connName.c_str(), peerAddr.toIpPort().c_str());
 
-// 通过sockfd获取其绑定的本机的ip地址和端口信息
+    // 通过sockfd获取其绑定的本机的ip地址和端口信息
     sockaddr_in local;
-    ::bzero(&local,sizeof local);
-    socklen_t addrlen=sizeof local;
-    if(::getsockname(sockfd,(sockaddr*) &local,&addrlen)<0)
+    ::bzero(&local, sizeof local);
+    socklen_t addrlen = sizeof local;
+    if (::getsockname(sockfd, (sockaddr*)&local, &addrlen) < 0)
     {
         LOG_ERROR("sockets::getLocalAddr");
     }
@@ -96,8 +94,7 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr)
                             sockfd,   // Socket Channel
                             localAddr,
                             peerAddr));
-    connections_[connName]=conn;
-
+    connections_[connName] = conn;
     // 下面的回调都是用户设置给TcpServer=>TcpConnection=>Channel=>Poller=>notify channel调用回调
     conn->setConnectionCallback(connectionCallback_);
     conn->setMessageCallback(messageCallback_);
@@ -110,13 +107,12 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr)
 
     // 直接调用TcpConnection::connectEstablished
     ioLoop->runInLoop(std::bind(&TcpConnection::connectEstablished, conn));
-
 }
 
 void TcpServer::removeConnection(const TcpConnectionPtr &conn)
 {
     loop_->runInLoop(
-        std::bind(&TcpServer::removeConnectionInLoop,this,conn)
+        std::bind(&TcpServer::removeConnectionInLoop, this, conn)
     );
 }
 

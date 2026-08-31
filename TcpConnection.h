@@ -19,18 +19,17 @@ class Socket;
  * =》 TcpConnection 设置回调 =》 Channel =》 Poller =》 Channel的回调操作
  * 
  */ 
- 
-class TcpConnection : noncopyable,public std::enable_shared_from_this<TcpConnection>
+class TcpConnection : noncopyable, public std::enable_shared_from_this<TcpConnection>
 {
 public:
-    TcpConnection(EventLoop *loop,
-                const std::string &name,
+    TcpConnection(EventLoop *loop, 
+                const std::string &name, 
                 int sockfd,
-                const InetAddress& localAddr_,
-                const InetAddress& peerAddr_);
+                const InetAddress& localAddr,
+                const InetAddress& peerAddr);
     ~TcpConnection();
 
-    EventLoop* getLoop() const {return loop_;}
+    EventLoop* getLoop() const { return loop_; }
     const std::string& name() const { return name_; }
     const InetAddress& localAddress() const { return localAddr_; }
     const InetAddress& peerAddress() const { return peerAddr_; }
@@ -57,15 +56,12 @@ public:
     void setCloseCallback(const CloseCallback& cb)
     { closeCallback_ = cb; }
 
-    //建立连接
+    // 连接建立
     void connectEstablished();
-
-    //销毁链接
+    // 连接销毁
     void connectDestroyed();
-
 private:
-    enum StateE{kDisconnected, kConnecting, kConnected, kDisconnecting};
-    
+    enum StateE {kDisconnected, kConnecting, kConnected, kDisconnecting};
     void setState(StateE state) { state_ = state; }
 
     void handleRead(Timestamp receiveTime);
@@ -75,13 +71,13 @@ private:
 
     void sendInLoop(const void* message, size_t len);
     void shutdownInLoop();
-    
-    EventLoop *loop_;//这里不是baseloop tcpconnection管理所有的subloop
+
+    EventLoop *loop_; // 这里绝对不是baseLoop， 因为TcpConnection都是在subLoop里面管理的
     const std::string name_;
     std::atomic_int state_;
     bool reading_;
 
-     // 这里和Acceptor类似   Acceptor=》mainLoop    TcpConenction=》subLoop
+    // 这里和Acceptor类似   Acceptor=》mainLoop    TcpConenction=》subLoop
     std::unique_ptr<Socket> socket_;
     std::unique_ptr<Channel> channel_;
 
@@ -93,9 +89,8 @@ private:
     WriteCompleteCallback writeCompleteCallback_; // 消息发送完成以后的回调
     HighWaterMarkCallback highWaterMarkCallback_;
     CloseCallback closeCallback_;
-
     size_t highWaterMark_;
 
-    Buffer inputBuffer_;
-    Buffer outputBuffer_;
+    Buffer inputBuffer_;  // 接收数据的缓冲区
+    Buffer outputBuffer_; // 发送数据的缓冲区
 };

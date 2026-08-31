@@ -18,7 +18,7 @@ cd ..
 
 # 把头文件拷贝到 /usr/include/mymuduo  so库拷贝到 /usr/lib    PATH
 if [ ! -d /usr/include/mymuduo ]; then 
-     mkdir -p /usr/include/mymuduo
+    mkdir /usr/include/mymuduo
 fi
 
 for header in `ls *.h`
