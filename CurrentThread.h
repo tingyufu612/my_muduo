@@ -4,16 +4,16 @@
 #include <unistd.h>
 namespace CurrentThread
 {
-   extern __thread int  t_cachedTied;
+   extern __thread int  t_cachedTId;
 
     void cacheTid();
 
     inline int tid()
     {
-        if(__builtin_expect(t_cachedTied==0,0))
+        if(__builtin_expect(t_cachedTid==0,0))
         {
             cacheTid();
         }
-        return t_cachedTied;
+        return t_cachedTid;
     }
 };
